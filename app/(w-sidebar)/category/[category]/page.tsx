@@ -1,12 +1,9 @@
 import ItemGrid from "@/components/marketplace/item-grid";
 
-// allow both runtime object and Promise
-type TParams = { category: string } | Promise<{ category: string }>;
+type TParams = Promise<{ category: string }>;
 
 export default async function CategoryPage({ params }: { params: TParams }) {
-  // normalize whether it's a Promise or not
-  const resolvedParams = await Promise.resolve(params);
-  const { category } = resolvedParams;
+  const { category }: { category: string } = await params;
 
   const formattedCategory = decodeURIComponent(category).replace(/-/g, " ");
 
