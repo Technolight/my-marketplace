@@ -6,7 +6,7 @@ import ItemCard from "./item-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-type Listing = {
+export type Listing = {
   id: string;
   title: string;
   price: number;
