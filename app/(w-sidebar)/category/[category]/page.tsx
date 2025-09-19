@@ -1,15 +1,11 @@
 import { supabase } from "@/lib/supabaseClient";
 import ItemGrid from "@/components/marketplace/item-grid";
-import React, { JSX } from "react";
 
 interface Props {
   params: { category: string };
 }
 
-// Mark return type explicitly as JSX.Element
-export default async function CategoryPage({
-  params,
-}: Props): Promise<JSX.Element> {
+export default async function CategoryPage({ params }: Props) {
   const { category } = params;
   const formattedCategory = decodeURIComponent(category).replace(/-/g, " ");
 
