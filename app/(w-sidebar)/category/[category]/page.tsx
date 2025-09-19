@@ -1,10 +1,9 @@
-import { use } from "react";
 import ItemGrid from "@/components/marketplace/item-grid";
 
 type TParams = Promise<{ category: string }>;
 
-export default function CategoryPage(props: { params: TParams }) {
-  const { category } = use(props.params);
+export default async function CategoryPage(props: { params: TParams }) {
+  const { category } = await props.params;
 
   const formattedCategory = decodeURIComponent(category).replace(/-/g, " ");
 
