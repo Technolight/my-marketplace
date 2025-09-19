@@ -1,11 +1,13 @@
 import { supabase } from "@/lib/supabaseClient";
 import ItemGrid from "@/components/marketplace/item-grid";
 
-interface Props {
-  params: { category: string };
+interface CategoryPageProps {
+  params: {
+    category: string;
+  };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
   const formattedCategory = decodeURIComponent(category).replace(/-/g, " ");
 
