@@ -8,10 +8,8 @@ export default function ItemPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // ✅ unwrap the promise using React's `use`
   const { id } = use(params);
 
-  // Fetch listing synchronously
   const { data: listingData, error: listingError } = use(
     supabase.from("listings").select("*").eq("id", id).single()
   );

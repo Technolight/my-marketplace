@@ -1,12 +1,13 @@
-import { supabase } from "@/lib/supabaseClient";
+import { use } from "react";
 import ItemGrid from "@/components/marketplace/item-grid";
 
-interface Props {
+export default function CategoryPage({
+  params,
+}: {
   params: Promise<{ category: string }>;
-}
+}) {
+  const { category } = use(params);
 
-export default async function CategoryPage({ params }: Props) {
-  const { category } = await params;
   const formattedCategory = decodeURIComponent(category).replace(/-/g, " ");
 
   return (
