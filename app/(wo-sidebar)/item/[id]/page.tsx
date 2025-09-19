@@ -1,25 +1,40 @@
+import { use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Item from "@/components/marketplace/item";
 import { notFound } from "next/navigation";
 
-export default async function ItemPage({ params }: { params: { id: string } }) {
-  const { data: listingData, error: listingError } = await supabase
-    .from("listings")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+export default function ItemPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // ✅ unwrap the promise using React's `use`
+  const { id } = use(params);
+
+  // Fetch listing synchronously
+  const { data: listingData, error: listingError } = use(
+    supabase.from("listings").select("*").eq("id", id).single()
+  );
 
   if (listingError || !listingData) {
     notFound();
   }
 
-  let vehicleData = null;
+  let vehicleData: {
+    year: number;
+    make: string;
+    model: string;
+    mileage: number;
+  } | null = null;
+
   if (listingData.category?.toLowerCase() === "vehicles") {
-    const { data: vData, error: vError } = await supabase
-      .from("vehicles")
-      .select("year, make, model, mileage")
-      .eq("listing_id", params.id)
-      .single();
+    const { data: vData, error: vError } = use(
+      supabase
+        .from("vehicles")
+        .select("year, make, model, mileage")
+        .eq("listing_id", id)
+        .single()
+    );
 
     if (!vError && vData) {
       vehicleData = vData;
