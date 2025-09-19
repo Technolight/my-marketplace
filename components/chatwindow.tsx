@@ -17,18 +17,24 @@ type ChatWindowProps = {
   onClose: () => void;
 };
 
+type Listing = {
+  title: string;
+  price: number;
+  location: string;
+  image_url: string | null;
+};
+
 type Message = {
   id: string;
   message: string;
   buyer_email: string;
   seller_email: string;
   created_at: string;
-  listings?: {
-    title: string;
-    price: number;
-    location: string;
-    image_url: string;
-  };
+  listings?: Listing;
+};
+
+type MessageWithListing = Message & {
+  listings?: Listing;
 };
 
 const ChatWindow = ({
@@ -39,12 +45,7 @@ const ChatWindow = ({
 }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [listingData, setListingData] = useState<{
-    title: string;
-    price: number;
-    location: string;
-    image_url: string | null;
-  } | null>(null);
+  const [listingData, setListingData] = useState<Listing | null>(null);
   const [firstPhotoUrl, setFirstPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,9 +64,12 @@ const ChatWindow = ({
         .order("created_at", { ascending: true });
 
       if (!error && data) {
-        setMessages(data as Message[]);
-        if (data.length > 0 && (data[0] as any).listings) {
-          const listing = (data[0] as any).listings;
+        const typedData = data as MessageWithListing[];
+        setMessages(typedData);
+
+        const firstMessage = typedData[0];
+        if (firstMessage?.listings) {
+          const listing = firstMessage.listings;
           setListingData(listing);
 
           if (listing.image_url) {
@@ -168,7 +172,6 @@ const ChatWindow = ({
               </Link>
             )}
 
-            {/* Actual chat messages */}
             {messages.length === 0 ? (
               <p className="text-sm text-gray-500">No messages yet.</p>
             ) : (

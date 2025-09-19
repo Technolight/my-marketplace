@@ -91,11 +91,14 @@ const VehiclePage = () => {
       setMake("");
       setModel("");
       setMileage("");
-    } catch (err: any) {
-      console.error(err);
-      alert("Error creating listing: " + err.message);
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err);
+        alert("Error creating listing: " + err.message);
+      } else {
+        console.error(err);
+        alert("An unexpected error occurred");
+      }
     }
   };
 
