@@ -130,21 +130,27 @@ const ChatWindow = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-96">
-      <Card className="shadow-xl">
+    <div
+      className="
+      fixed bottom-0 right-0 w-full h-full 
+      md:bottom-4 md:right-4 md:w-96 md:h-auto
+      flex flex-col
+    "
+    >
+      <Card className="shadow-xl flex flex-col h-full md:h-auto">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-semibold">
+          <CardTitle className="text-lg font-semibold">
             {listingData ? listingData.title : `Chat with ${sellerEmail}`}
           </CardTitle>
           <button
             onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-200"
           >
-            <X size={16} />
+            <X size={26} />
           </button>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 overflow-y-auto border p-2 rounded-md mb-2 bg-gray-50">
+        <CardContent className="flex flex-col flex-1">
+          <div className="flex-1 overflow-y-auto border p-2 rounded-md mb-2 bg-gray-50">
             {listingData && (
               <Link
                 href={`/item/${listingId}`}
