@@ -6,7 +6,6 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -14,6 +13,7 @@ import {
   formatMileage,
   formatTimeAgo,
 } from "@/components/formatter";
+import { toast } from "sonner";
 
 export type ItemProps = {
   photos?: (File | string)[];
@@ -25,13 +25,14 @@ export type ItemProps = {
   email?: string;
   className?: string;
   created_at?: string;
-
   year?: number;
   make?: string;
   model?: string;
   mileage?: number;
-  id?: string; // 👈 needed to link messages to a listing
+  id?: string;
 };
+
+const BUYER_EMAIL = "gabstorres21@gmail.com"; // 👈 defaulted buyer email
 
 const Item = ({
   photos = [],
@@ -51,15 +52,17 @@ const Item = ({
 }: ItemProps) => {
   const pathname = usePathname();
   const isCreatePage = pathname.startsWith("/create");
+
   const [loading, setLoading] = useState(false);
-  const [buyerEmail, setBuyerEmail] = useState("");
   const [message, setMessage] = useState("I'm interested in your item!");
   const [fetchedPhotos, setFetchedPhotos] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [hasMessaged, setHasMessaged] = useState(false);
 
   const getImageSrc = (photo: File | string) =>
     typeof photo === "string" ? photo : URL.createObjectURL(photo);
 
+  // ✅ Fetch photos
   useEffect(() => {
     const fetchPhotos = async () => {
       if (!folderPath || isCreatePage) return;
@@ -89,6 +92,30 @@ const Item = ({
 
   const displayPhotos = isCreatePage ? photos : fetchedPhotos;
 
+  // ✅ Check if buyer already messaged
+  useEffect(() => {
+    const checkMessage = async () => {
+      if (!id) return;
+
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("listing_id", id)
+        .eq("buyer_email", BUYER_EMAIL)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking messages:", error);
+      }
+
+      if (data) {
+        setHasMessaged(true);
+      }
+    };
+
+    checkMessage();
+  }, [id]);
+
   const handlePrev = () => {
     setSelectedIndex((prev) =>
       prev === 0 ? displayPhotos.length - 1 : prev - 1
@@ -101,9 +128,10 @@ const Item = ({
     );
   };
 
+  // ✅ Send message
   const handleSendMessage = async () => {
-    if (!buyerEmail || !message.trim()) {
-      alert("Please provide your email and a message.");
+    if (!message.trim()) {
+      toast.error("Please provide a message.", { duration: 5000 });
       return;
     }
 
@@ -111,7 +139,7 @@ const Item = ({
 
     const { error } = await supabase.from("messages").insert({
       listing_id: id,
-      buyer_email: buyerEmail,
+      buyer_email: BUYER_EMAIL,
       seller_email: email,
       message: message,
     });
@@ -120,11 +148,13 @@ const Item = ({
 
     if (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
+      toast.error("Failed to send message. Please try again.", {
+        duration: 5000,
+      });
     } else {
-      alert("Message sent successfully!");
+      toast.success("Message sent successfully!", { duration: 5000 });
       setMessage("I'm interested in your item!");
-      setBuyerEmail("");
+      setHasMessaged(true); // 👈 hide textarea and show alert
     }
   };
 
@@ -132,6 +162,7 @@ const Item = ({
     <Card className={cn("block", className)}>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left side: Photos */}
           <div>
             <div className="relative h-96 md:h-auto rounded-md md:aspect-square flex items-center justify-center mb-4 overflow-hidden">
               {displayPhotos.length > 0 ? (
@@ -196,6 +227,7 @@ const Item = ({
             )}
           </div>
 
+          {/* Right side: Info */}
           <div className="space-y-2">
             <div>
               <h3 className="text-2xl font-bold">{title || "Title"}</h3>
@@ -231,24 +263,27 @@ const Item = ({
             {!isCreatePage && (
               <div className="space-y-2">
                 <p className="mt-4 font-semibold">Contact Seller</p>
-                <Input
-                  type="email"
-                  placeholder="Your email"
-                  value={buyerEmail}
-                  onChange={(e) => setBuyerEmail(e.target.value)}
-                />
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="h-32"
-                />
-                <Button
-                  disabled={loading}
-                  onClick={handleSendMessage}
-                  className="w-full bg-[#1877F2] hover:bg-[rgb(50,136,255)] active:bg-[rgb(13,77,165)]"
-                >
-                  {loading ? "Sending..." : "Send Message"}
-                </Button>
+
+                {hasMessaged ? (
+                  <div className="p-4 bg-green-100 border border-green-300 text-green-700 rounded-md">
+                    ✅ You’ve already contacted the seller about this listing.
+                  </div>
+                ) : (
+                  <>
+                    <Textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="h-32"
+                    />
+                    <Button
+                      disabled={loading}
+                      onClick={handleSendMessage}
+                      className="w-full bg-[#1877F2] hover:bg-[rgb(50,136,255)] active:bg-[rgb(13,77,165)]"
+                    >
+                      {loading ? "Sending..." : "Send Message"}
+                    </Button>
+                  </>
+                )}
               </div>
             )}
           </div>

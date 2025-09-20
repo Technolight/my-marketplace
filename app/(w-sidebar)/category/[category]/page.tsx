@@ -9,7 +9,9 @@ export default async function CategoryPage({ params }: { params: TParams }) {
 
   return (
     <div>
-      <h2 className="capitalize font-bold text-2xl">{formattedCategory}</h2>
+      <h2 className="capitalize font-bold text-2xl mb-2">
+        {formattedCategory}
+      </h2>
       <ItemGrid category={formattedCategory} />
     </div>
   );
