@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabaseClient";
 import Item from "@/components/marketplace/item";
-import { toast } from "sonner"; // 👈 import Sonner
+import { toast } from "sonner";
+import { useRouter } from "next/navigation"; // 👈 router
 
 const categories = [
   "Property Rentals",
@@ -37,6 +38,8 @@ const categories = [
 ];
 
 const ItemPage = () => {
+  const router = useRouter(); // 👈 init router
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
@@ -67,14 +70,6 @@ const ItemPage = () => {
     maxSize: 5 * 1024 * 1024,
   });
 
-  const handlePrev = () => {
-    setSelectedIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setSelectedIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
-  };
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -86,7 +81,6 @@ const ItemPage = () => {
 
         for (const file of photos) {
           const filePath = `${folderPath}/${file.name}`;
-
           const { error: uploadError } = await supabase.storage
             .from("listing-images")
             .upload(filePath, file);
@@ -95,28 +89,30 @@ const ItemPage = () => {
         }
       }
 
-      const { error: insertError } = await supabase.from("listings").insert({
-        title,
-        description,
-        price: parseFloat(price),
-        category,
-        seller_email: email,
-        image_url: folderPath,
-        location: location || "Palo Alto, CA",
-      });
+      const { data: listingData, error: insertError } = await supabase
+        .from("listings")
+        .insert({
+          title,
+          description,
+          price: parseFloat(price),
+          category,
+          seller_email: email,
+          image_url: folderPath,
+          location: location || "Palo Alto, CA",
+        })
+        .select("id")
+        .single();
 
       if (insertError) throw insertError;
 
-      // ✅ Success toast
-      toast.success("Listing created successfully!", { duration: 5000 });
+      if (listingData?.id) {
+        toast.success("Listing created successfully!", { duration: 3000 });
 
-      setTitle("");
-      setCategory("");
-      setPrice("");
-      setLocation("");
-      setEmail("");
-      setDescription("");
-      setPhotos([]);
+        // ✅ Redirect after 1.5s so toast shows
+        setTimeout(() => {
+          router.push(`/item/${listingData.id}`);
+        }, 1500);
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err);

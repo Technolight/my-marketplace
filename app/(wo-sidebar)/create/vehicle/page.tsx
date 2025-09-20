@@ -7,9 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import Item from "@/components/marketplace/item";
-import { toast } from "sonner"; // 👈 import Sonner
+import { toast } from "sonner";
+import { useRouter } from "next/navigation"; // 👈 import router
 
 const VehiclePage = () => {
+  const router = useRouter(); // 👈 init router
+
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [location, setLocation] = useState("");
@@ -79,24 +82,17 @@ const VehiclePage = () => {
           mileage: mileage ? parseInt(mileage) : null,
         });
         if (vehicleError) throw vehicleError;
+
+        // ✅ Success toast
+        toast.success("Vehicle listing created successfully!", {
+          duration: 3000,
+        });
+
+        // ✅ Redirect to the listing page after 1.5s
+        setTimeout(() => {
+          router.push(`/item/${listingData.id}`);
+        }, 1500);
       }
-
-      // ✅ Success toast
-      toast.success("Vehicle listing created successfully!", {
-        duration: 5000,
-      });
-
-      // Reset form
-      setTitle("");
-      setPrice("");
-      setLocation("");
-      setEmail("");
-      setDescription("");
-      setPhotos([]);
-      setYear("");
-      setMake("");
-      setModel("");
-      setMileage("");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err);
@@ -115,6 +111,7 @@ const VehiclePage = () => {
   return (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
       <div className="space-y-6">
+        {/* Photos Upload */}
         <div>
           <h2 className="font-semibold mb-2">Photos</h2>
           <div
@@ -133,12 +130,12 @@ const VehiclePage = () => {
           </div>
         </div>
 
+        {/* Form Inputs */}
         <Input
           placeholder="Title * — What are you selling?"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-
         <Input
           type="number"
           placeholder="Price * — 0.00"
@@ -199,6 +196,7 @@ const VehiclePage = () => {
         </Button>
       </div>
 
+      {/* Preview */}
       <div>
         <h2 className="font-semibold mb-2">Preview</h2>
         <Item
