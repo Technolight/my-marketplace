@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import Item from "@/components/marketplace/item";
+import { toast } from "sonner"; // 👈 import Sonner
 
 const VehiclePage = () => {
   const [title, setTitle] = useState("");
@@ -80,7 +81,12 @@ const VehiclePage = () => {
         if (vehicleError) throw vehicleError;
       }
 
-      alert("Vehicle listing created successfully!");
+      // ✅ Success toast
+      toast.success("Vehicle listing created successfully!", {
+        duration: 5000,
+      });
+
+      // Reset form
       setTitle("");
       setPrice("");
       setLocation("");
@@ -94,11 +100,15 @@ const VehiclePage = () => {
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err);
-        alert("Error creating listing: " + err.message);
+        toast.error("Error creating listing: " + err.message, {
+          duration: 5000,
+        });
       } else {
         console.error(err);
-        alert("An unexpected error occurred");
+        toast.error("An unexpected error occurred", { duration: 5000 });
       }
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/header";
 import SideBar from "@/components/layout/sidebar";
 import ChatWindow from "@/components/chatwindow";
-
+import { Toaster } from "@/components/ui/sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,6 +37,7 @@ export default function RootLayout({
           </div>
           <div className="flex-1">{children}</div>
         </div>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

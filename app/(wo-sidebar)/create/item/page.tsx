@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabaseClient";
 import Item from "@/components/marketplace/item";
+import { toast } from "sonner"; // 👈 import Sonner
 
 const categories = [
   "Property Rentals",
@@ -106,7 +107,9 @@ const ItemPage = () => {
 
       if (insertError) throw insertError;
 
-      alert("Listing created successfully!");
+      // ✅ Success toast
+      toast.success("Listing created successfully!", { duration: 5000 });
+
       setTitle("");
       setCategory("");
       setPrice("");
@@ -117,11 +120,15 @@ const ItemPage = () => {
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err);
-        alert("Error creating listing: " + err.message);
+        toast.error("Error creating listing: " + err.message, {
+          duration: 5000,
+        });
       } else {
         console.error(err);
-        alert("An unexpected error occurred");
+        toast.error("An unexpected error occurred", { duration: 5000 });
       }
+    } finally {
+      setLoading(false);
     }
   };
 
